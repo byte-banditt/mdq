@@ -37,12 +37,11 @@ Error rows (non-positive/null OHLC, inconsistent OHLC, source-batch duplicates) 
 ## Development
 
 ```sh
-pytest -q
+pytest -q --cov=mdq --cov-report=term-missing --cov-report=json
 ruff check src tests
-python scripts/measure_tests.py
 ```
 
-`scripts/measure_tests.py` records test count and stdlib trace/AST statement-line coverage in `test_metrics.json`. The tests use committed CSV/synthetic fixtures and do not access network. Synthetic zero-tick volatility demonstration is explicitly not a real-data finding. See `docs/DATA_SOURCES.md`, `docs/INTERVIEW_NOTES.md`, and `sql/queries.sql`.
+The tests use committed CSV/synthetic fixtures and do not access network. Synthetic zero-tick volatility demonstration is explicitly not a real-data finding. See `docs/DATA_SOURCES.md`, `docs/INTERVIEW_NOTES.md`, and `sql/queries.sql`.
 
 ## Limits
 

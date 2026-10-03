@@ -83,9 +83,10 @@ def write_results(database: str, cfg: dict[str, Any], run_id: str, started: str)
     metrics = json.loads(metrics_path.read_text()) if metrics_path.exists() else {}
     test_count = metrics.get("tests", "NOT MEASURED")
     coverage = metrics.get("coverage", {})
+    modules = coverage.get("modules", {})
+    coverage_lines = [f"- {module}: {percent}%" for module, percent in modules.items()]
+    coverage_lines.append(f"- Total: {coverage.get('total', 'NOT MEASURED')}%")
     synthetic = metrics.get("synthetic_volatility", {})
-    checks_cov = coverage.get("checks.py", {}).get("percent", "NOT MEASURED")
-    clean_cov = coverage.get("clean.py", {}).get("percent", "NOT MEASURED")
     issues = (
         "\n".join(f"- {name} ({severity}): {number}" for name, severity, number in issue_rows)
         or "- None"
@@ -117,8 +118,10 @@ Generated from run `{run_id}` at {finished.isoformat()}.
 - Rows excluded from clean: {count - clean_count}
 - Pipeline runtime: {elapsed:.2f} seconds
 - Pytest count: {test_count}
-- Statement-line coverage: checks.py {checks_cov}%, clean.py {clean_cov}%
-  (stdlib trace + AST metric)
+
+## Coverage.py line coverage
+
+{chr(10).join(coverage_lines)}
 
 ## Issues by check
 

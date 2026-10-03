@@ -8,4 +8,4 @@
 
 Python, Pandas, NumPy, SQL, SQLite, ETL, Git, Linux/cron entry point, yfinance, pytest, openpyxl. R not included; optional milestone 7 was not built.
 
-Coverage metric is stdlib `trace` execution intersected with AST statement-start lines: `checks.py` **84.2%**, `clean.py` **86.4%**. It is a lightweight project metric, not `coverage.py` branch coverage.
+Coverage.py via pytest-cov: total **40%**. Per module: `checks.py` **85.94%**, `clean.py` **100%**, `cli.py` **0%**, `ingest.py` **23%**, `report.py` **0%**, `store.py` **87.5%**, `__init__.py` **100%**.

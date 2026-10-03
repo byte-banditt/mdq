@@ -7,3 +7,5 @@ data/
 output/*.xlsx
 logs/*.log
 .coverage
+coverage.json
+.coverage.*

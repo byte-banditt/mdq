@@ -1,16 +1,16 @@
 {
   "tests": 15,
   "coverage": {
-    "checks.py": {
-      "covered": 39,
-      "statements": 57,
-      "percent": 68.4
+    "modules": {
+      "src/mdq/__init__.py": 100.0,
+      "src/mdq/checks.py": 85.9375,
+      "src/mdq/clean.py": 100.0,
+      "src/mdq/cli.py": 0.0,
+      "src/mdq/ingest.py": 22.580645161290324,
+      "src/mdq/report.py": 0.0,
+      "src/mdq/store.py": 87.5
     },
-    "clean.py": {
-      "covered": 19,
-      "statements": 22,
-      "percent": 86.4
-    }
+    "total": 40.0
   },
   "synthetic_volatility": {
     "naive": "UNDEFINED (inf/NaN)",
@@ -19,6 +19,5 @@
       "4",
       "8"
     ]
-  },
-  "pytest_exit_code": 0
+  }
 }
