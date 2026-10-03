@@ -6,6 +6,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from mdq.store import connect
+
 DB = Path("data/mdq.sqlite")
 
 
@@ -33,7 +35,7 @@ def fit(stock: pd.Series, market: pd.Series) -> tuple[float, float, float] | Non
 def main() -> None:
     if not DB.exists():
         raise SystemExit("Run mdq run first to populate data/mdq.sqlite")
-    with sqlite3.connect(DB) as conn:
+    with connect(str(DB)) as conn:
         market = returns(conn, "prices_clean", "^NSEI")
         symbols = [
             row[0]

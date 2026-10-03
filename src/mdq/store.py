@@ -1,6 +1,8 @@
 """SQLite storage and configuration helpers."""
 
 import sqlite3
+from collections.abc import Iterator
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -12,11 +14,19 @@ def load_config(path: str | Path) -> dict[str, Any]:
         return yaml.safe_load(stream)
 
 
-def connect(database: str) -> sqlite3.Connection:
+@contextmanager
+def connect(database: str) -> Iterator[sqlite3.Connection]:
     Path(database).parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(database)
     conn.row_factory = sqlite3.Row
-    return conn
+    try:
+        yield conn
+        conn.commit()
+    except BaseException:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
 
 
 def init_db(database: str) -> None:

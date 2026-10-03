@@ -1,25 +1,25 @@
 # Run results
 
-Generated from run `5fe09c42-ef05-4cbd-9756-846dec4c4612` at 2026-10-03T09:35:05.274602+00:00.
+Generated from run `5d35edd3-2433-4fed-a31b-c94df574d42d` at 2026-10-03T10:00:31.662910+00:00.
 
 - Symbols configured: 22
 - Data range: 2021-10-04 to 2026-10-01
 - Rows ingested this run: 88
 - Total stored rows: 27280
 - Rows excluded from clean: 5
-- Pipeline runtime: 6.67 seconds
-- Pytest count: 17
+- Pipeline runtime: 6.45 seconds
+- Pytest count: 28
 
 ## Coverage.py line coverage
 
 - src/mdq/__init__.py: 100.0%
-- src/mdq/checks.py: 85.9375%
+- src/mdq/checks.py: 100.0%
 - src/mdq/clean.py: 100.0%
-- src/mdq/cli.py: 0.0%
-- src/mdq/ingest.py: 22.580645161290324%
-- src/mdq/report.py: 0.0%
-- src/mdq/store.py: 87.5%
-- Total: 40.0%
+- src/mdq/cli.py: 95.23809523809524%
+- src/mdq/ingest.py: 95.6989247311828%
+- src/mdq/report.py: 95.71428571428571%
+- src/mdq/store.py: 100.0%
+- Total: 97.32441471571906%
 
 ## Issues by check
 
