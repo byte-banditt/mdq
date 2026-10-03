@@ -78,3 +78,32 @@ def test_return_outlier_and_flat_edge():
     assert check_return_outlier(
         data([{**BASE, "date": str(i), "adj_close": 10} for i in range(4)]), CFG
     ).empty
+
+
+def test_null_ohlc_index_bar_counts_as_session_for_stock_present_that_day():
+    cfg = {"symbols": ["^NSEI", "A.NS"]}
+    frame = data(
+        [
+            {
+                **BASE,
+                "symbol": "^NSEI",
+                "date": "D",
+                "open": None,
+                "high": None,
+                "low": None,
+                "close": None,
+            },
+            {**BASE, "symbol": "A.NS", "date": "D"},
+        ]
+    )
+
+    assert check_missing_sessions(frame, cfg).empty
+
+
+def test_valid_index_session_missing_from_stock_is_flagged_exactly():
+    cfg = {"symbols": ["^NSEI", "A.NS"]}
+    frame = data([{**BASE, "symbol": "^NSEI", "date": "E"}])
+
+    issues = check_missing_sessions(frame, cfg)
+
+    assert issues[["symbol", "date"]].values.tolist() == [["A.NS", "E"]]

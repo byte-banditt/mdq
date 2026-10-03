@@ -1,5 +1,5 @@
 {
-  "tests": 15,
+  "tests": 17,
   "coverage": {
     "modules": {
       "src/mdq/__init__.py": 100.0,
