@@ -1,15 +1,15 @@
 # Run results
 
-Generated from run `c507a8dc-8bb9-4eee-b091-b9d291cb2cc2` at 2026-10-03T09:05:50.191609+00:00.
+Generated from run `958a1a96-5b0c-4945-adac-b8795b6efc34` at 2026-10-03T09:27:21.136054+00:00.
 
 - Symbols configured: 22
 - Data range: 2021-10-04 to 2026-10-01
 - Rows ingested this run: 88
 - Total stored rows: 27280
 - Rows excluded from clean: 5
-- Pipeline runtime: 6.64 seconds
+- Pipeline runtime: 6.72 seconds
 - Pytest count: 15
-- Statement-line coverage: checks.py 84.2%, clean.py 86.4%
+- Statement-line coverage: checks.py 68.4%, clean.py 86.4%
   (stdlib trace + AST metric)
 
 ## Issues by check
@@ -23,6 +23,7 @@ Generated from run `c507a8dc-8bb9-4eee-b091-b9d291cb2cc2` at 2026-10-03T09:05:50
 
 ## Synthetic zero-tick demonstration
 
-- Clean annualized volatility: 0.004739682022152733
-- With injected zero-price ticks: INFINITE
-- Ratio: INFINITE (synthetic only; log return at zero is infinite)
+Synthetic only: naive return-based volatility with injected zero-price ticks is
+UNDEFINED (inf/NaN). After `non_positive_price` excludes the
+flagged rows (['4', '8']), annualized volatility
+is finite: 0.6822803693562768.

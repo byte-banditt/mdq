@@ -10,6 +10,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
+from mdq.checks import check_non_positive_price
 from mdq.clean import annualized_volatility
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -72,21 +73,34 @@ def main() -> None:
             "statements": len(lines),
             "percent": round(100 * hit / len(lines), 1),
         }
-    synthetic = pd.DataFrame({"date": range(12), "close": [100 + i for i in range(12)]})
-    corrupted = synthetic.copy()
-    corrupted.loc[[4, 8], "close"] = 0
-    clean_vol = annualized_volatility(synthetic)
-    raw_vol = annualized_volatility(corrupted)
-    ratio = raw_vol / clean_vol
-    raw_vol = raw_vol if math.isfinite(raw_vol) else "INFINITE"
-    ratio = ratio if math.isfinite(ratio) else "INFINITE"
+    synthetic_prices = list(range(100, 112))
+    synthetic = pd.DataFrame(
+        {
+            "symbol": "SYNTH.NS",
+            "date": [str(i) for i in range(12)],
+            "open": synthetic_prices,
+            "high": [value + 1 for value in synthetic_prices],
+            "low": [value - 1 for value in synthetic_prices],
+            "close": synthetic_prices,
+            "adj_close": synthetic_prices,
+            "volume": 100,
+        }
+    )
+    injected_dates = ["4", "8"]
+    synthetic.loc[synthetic["date"].isin(injected_dates), ["open", "high", "low", "close"]] = 0
+    flagged = check_non_positive_price(synthetic, {})
+    cleaned_synthetic = synthetic.loc[~synthetic["date"].isin(flagged["date"])]
+    naive_volatility = annualized_volatility(synthetic)
+    cleaned_volatility = annualized_volatility(cleaned_synthetic)
     payload = {
         "tests": counter.count,
         "coverage": coverage,
         "synthetic_volatility": {
-            "clean": clean_vol,
-            "with_zero_ticks": raw_vol,
-            "ratio": ratio,
+            "naive": "UNDEFINED (inf/NaN)"
+            if not math.isfinite(naive_volatility)
+            else naive_volatility,
+            "cleaned": cleaned_volatility,
+            "flagged_dates": sorted(flagged["date"].tolist()),
         },
         "pytest_exit_code": int(result),
     }

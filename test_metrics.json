@@ -2,9 +2,9 @@
   "tests": 15,
   "coverage": {
     "checks.py": {
-      "covered": 48,
+      "covered": 39,
       "statements": 57,
-      "percent": 84.2
+      "percent": 68.4
     },
     "clean.py": {
       "covered": 19,
@@ -13,9 +13,12 @@
     }
   },
   "synthetic_volatility": {
-    "clean": 0.004739682022152733,
-    "with_zero_ticks": "INFINITE",
-    "ratio": "INFINITE"
+    "naive": "UNDEFINED (inf/NaN)",
+    "cleaned": 0.6822803693562768,
+    "flagged_dates": [
+      "4",
+      "8"
+    ]
   },
   "pytest_exit_code": 0
 }

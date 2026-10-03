@@ -116,8 +116,9 @@ Generated from run `{run_id}` at {finished.isoformat()}.
 
 ## Synthetic zero-tick demonstration
 
-- Clean annualized volatility: {synthetic.get("clean", "NOT MEASURED")}
-- With injected zero-price ticks: {synthetic.get("with_zero_ticks", "NOT MEASURED")}
-- Ratio: {synthetic.get("ratio", "NOT MEASURED")} (synthetic only; log return at zero is infinite)
+Synthetic only: naive return-based volatility with injected zero-price ticks is
+{synthetic.get("naive", "NOT MEASURED")}. After `non_positive_price` excludes the
+flagged rows ({synthetic.get("flagged_dates", "NOT MEASURED")}), annualized volatility
+is finite: {synthetic.get("cleaned", "NOT MEASURED")}.
 """
     Path("RESULTS.md").write_text(content, encoding="utf-8")

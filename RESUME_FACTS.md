@@ -2,7 +2,7 @@
 
 - Built automated Pandas/SQL pipeline for **21 NSE equity symbols plus Nifty 50** (22 configured instruments), covering **2021-10-04 through 2026-10-01** (1,240 rows per instrument; 27,280 stored rows), with SQLite idempotent incremental loads and Linux cron entry point.
 - Packaged six data-quality checks; **15 pytest tests**; checks flagged **20 issue rows** on real history in latest run: 5 error rows and 15 warning rows. The five error rows were null OHLC bars for `^NSEI`; no zero-price issue was detected in real run.
-- Synthetic zero-tick test: clean-series annualized volatility **0.004739682**; injected zero prices make log-return volatility **infinite** (`log(0)`), so ratio is `∞×` and not a finite ratio. This is synthetic, not a real-data finding. Clean data feeds Single Index Model example and openpyxl Excel pack.
+- Synthetic only: naive return volatility with injected zero-price ticks is **UNDEFINED (inf/NaN)**. `non_positive_price` flags injected dates `4` and `8`; after excluding those rows, measured annualized volatility is finite (**0.682280369**). Clean data feeds Single Index Model example and openpyxl Excel pack.
 
 ## Skills evidenced
 
