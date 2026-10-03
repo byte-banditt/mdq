@@ -23,8 +23,14 @@ def download_prices(symbols: list[str], start: str, end: str) -> pd.DataFrame:
     for attempt in range(3):
         try:
             frame = yf.download(
-                symbols, start=start, end=end, auto_adjust=False, progress=False,
-                threads=False, group_by="ticker", actions=False,
+                symbols,
+                start=start,
+                end=end,
+                auto_adjust=False,
+                progress=False,
+                threads=False,
+                group_by="ticker",
+                actions=False,
             )
             if frame.empty:
                 raise RuntimeError("yfinance returned no rows")
@@ -73,8 +79,17 @@ def upsert_prices(conn: sqlite3.Connection, frame: pd.DataFrame, ingested_at: st
     open=excluded.open,high=excluded.high,low=excluded.low,close=excluded.close,
     adj_close=excluded.adj_close,volume=excluded.volume,ingested_at=excluded.ingested_at"""
     values = [
-        (r.symbol, r.date, _number(r.open), _number(r.high), _number(r.low), _number(r.close),
-         _number(r.adj_close), _number(r.volume), ingested_at)
+        (
+            r.symbol,
+            r.date,
+            _number(r.open),
+            _number(r.high),
+            _number(r.low),
+            _number(r.close),
+            _number(r.adj_close),
+            _number(r.volume),
+            ingested_at,
+        )
         for r in frame.itertuples(index=False)
     ]
     conn.executemany(sql, values)
@@ -105,19 +120,25 @@ def run_pipeline(cfg: dict[str, Any], full: bool = False) -> None:
         prices = download_prices(cfg["symbols"], start, end)
         with connect(database) as conn:
             count = upsert_prices(conn, prices, datetime.now(timezone.utc).isoformat())
-            issues = run_checks(conn, cfg, run_id)
+            issues = run_checks(conn, cfg, run_id, downloaded=prices)
             rebuild_clean(conn, run_id)
-            conn.execute("UPDATE runs SET rows_ingested=?, issues_found=? WHERE run_id=?",
-                         (count, issues, run_id))
+            conn.execute(
+                "UPDATE runs SET rows_ingested=?, issues_found=? WHERE run_id=?",
+                (count, issues, run_id),
+            )
         export_excel(database, run_id)
         write_results(database, cfg, run_id, started)
         with connect(database) as conn:
-            conn.execute("UPDATE runs SET status='success',finished_at=? WHERE run_id=?",
-                         (datetime.now(timezone.utc).isoformat(), run_id))
+            conn.execute(
+                "UPDATE runs SET status='success',finished_at=? WHERE run_id=?",
+                (datetime.now(timezone.utc).isoformat(), run_id),
+            )
         LOGGER.info("run_id=%s status=success rows=%s issues=%s", run_id, count, issues)
     except Exception:
         with connect(database) as conn:
-            conn.execute("UPDATE runs SET status='failed',finished_at=? WHERE run_id=?",
-                         (datetime.now(timezone.utc).isoformat(), run_id))
+            conn.execute(
+                "UPDATE runs SET status='failed',finished_at=? WHERE run_id=?",
+                (datetime.now(timezone.utc).isoformat(), run_id),
+            )
         LOGGER.exception("run_id=%s status=failed", run_id)
         raise
