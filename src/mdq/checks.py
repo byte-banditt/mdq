@@ -103,17 +103,17 @@ def run_checks(
 ) -> int:
     """Evaluate checks and append the complete issue set for this run."""
     frame = pd.read_sql_query("SELECT * FROM prices_raw", conn)
-    if downloaded is not None and not downloaded.empty:
-        frame = pd.concat([frame, downloaded], ignore_index=True)
     checks = [
         check_non_positive_price,
         check_ohlc_inconsistent,
-        check_duplicate_rows,
         check_missing_sessions,
         check_stale_price,
         check_return_outlier,
     ]
-    issues = pd.concat([fn(frame, cfg) for fn in checks], ignore_index=True)
+    issue_frames = [fn(frame, cfg) for fn in checks]
+    if downloaded is not None and not downloaded.empty:
+        issue_frames.append(check_duplicate_rows(downloaded, cfg))
+    issues = pd.concat(issue_frames, ignore_index=True)
     now = datetime.now(timezone.utc).isoformat()
     conn.executemany(
         "INSERT OR REPLACE INTO dq_issues("
