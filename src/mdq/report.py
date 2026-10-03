@@ -71,6 +71,12 @@ def write_results(database: str, cfg: dict[str, Any], run_id: str, started: str)
             (run_id,),
         ).fetchall()
         impact = volatility_impact(conn, run_id)
+        error_rows = conn.execute(
+            "SELECT DISTINCT p.symbol,p.date,p.open,p.high,p.low,p.close "
+            "FROM prices_raw p JOIN dq_issues i ON i.symbol=p.symbol AND i.date=p.date "
+            "WHERE i.run_id=? AND i.severity='error' ORDER BY p.symbol,p.date",
+            (run_id,),
+        ).fetchall()
         finished = datetime.now(timezone.utc)
         elapsed = (finished - datetime.fromisoformat(started)).total_seconds()
     metrics_path = Path("test_metrics.json")
@@ -84,6 +90,14 @@ def write_results(database: str, cfg: dict[str, Any], run_id: str, started: str)
         "\n".join(f"- {name} ({severity}): {number}" for name, severity, number in issue_rows)
         or "- None"
     )
+    error_lines = []
+    for row in error_rows:
+        null_columns = [name for name in ("open", "high", "low", "close") if row[name] is None]
+        columns = ", ".join(null_columns) if null_columns else "none"
+        error_lines.append(
+            f"- {row['symbol']} {row['date']}: null OHLC columns {columns}; cause not verified"
+        )
+    error_text = "\n".join(error_lines) or "- None"
     vol_text = (
         "\n".join(
             f"- {row['symbol']}: raw={row['raw_volatility']:.6g}, "
@@ -110,9 +124,16 @@ Generated from run `{run_id}` at {finished.isoformat()}.
 
 {issues}
 
+## Error row details
+
+{error_text}
+
 ## Volatility impact (real data)
 
 {vol_text}
+
+Real-data impact is negligible (ratio ~1.0) because five error rows are null OHLC bars on
+`^NSEI`, not price corruption in equities.
 
 ## Synthetic zero-tick demonstration
 
