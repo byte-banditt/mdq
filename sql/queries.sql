@@ -10,11 +10,16 @@ GROUP BY check_name, severity ORDER BY issue_count DESC;
 WITH returns AS (
   SELECT symbol, date, log(close / LAG(close) OVER (PARTITION BY symbol ORDER BY date)) AS log_return
   FROM prices_clean WHERE close > 0
+), rolling AS (
+  SELECT symbol, date,
+    AVG(log_return) OVER w AS mean_return,
+    AVG(log_return * log_return) OVER w AS mean_squared_return
+  FROM returns
+  WINDOW w AS (PARTITION BY symbol ORDER BY date ROWS BETWEEN 19 PRECEDING AND CURRENT ROW)
 )
-SELECT symbol, date, sqrt(AVG(log_return * log_return) OVER (
-  PARTITION BY symbol ORDER BY date ROWS BETWEEN 19 PRECEDING AND CURRENT ROW
-)) AS rolling_rms_return
-FROM returns;
+SELECT symbol, date,
+  sqrt(max(mean_squared_return - mean_return * mean_return, 0.0)) AS rolling_std_return
+FROM rolling;
 
 -- Largest absolute one-day close moves per symbol.
 WITH moves AS (
