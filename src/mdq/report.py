@@ -1,0 +1,104 @@
+"""Excel analyst pack and measured run summary generation."""
+
+from __future__ import annotations
+
+from datetime import date, datetime, timezone
+from pathlib import Path
+from typing import Any
+
+import pandas as pd
+from openpyxl import load_workbook
+from openpyxl.styles import Font, PatternFill
+
+from mdq.clean import volatility_impact
+from mdq.store import connect
+
+
+def export_excel(database: str, run_id: str, output_dir: str = "output") -> Path:
+    """Export clean returns and run-scoped issue summary/detail."""
+    output = Path(output_dir)
+    output.mkdir(parents=True, exist_ok=True)
+    path = output / f"analyst_pack_{date.today().isoformat()}.xlsx"
+    with connect(database) as conn:
+        clean = pd.read_sql_query(
+            "SELECT symbol,date,adj_close FROM prices_clean ORDER BY date", conn
+        )
+        clean["date"] = pd.to_datetime(clean["date"])
+        clean["return"] = clean.groupby("symbol")["adj_close"].pct_change()
+        returns = clean.pivot(index="date", columns="symbol", values="return").reset_index()
+        detail = pd.read_sql_query(
+            "SELECT symbol,date,check_name,severity,detail,detected_at FROM dq_issues "
+            "WHERE run_id=? ORDER BY date,symbol,check_name",
+            conn,
+            params=(run_id,),
+        )
+        summary = detail.groupby(["check_name", "severity"], as_index=False).size()
+    with pd.ExcelWriter(path, engine="openpyxl") as writer:
+        returns.to_excel(writer, sheet_name="Returns_Clean", index=False)
+        summary.to_excel(writer, sheet_name="DQ_Summary", index=False)
+        detail.to_excel(writer, sheet_name="DQ_Detail", index=False)
+    workbook = load_workbook(path)
+    for sheet in workbook.worksheets:
+        sheet.freeze_panes = "A2"
+        for cell in sheet[1]:
+            cell.font = Font(bold=True, color="FFFFFF")
+            cell.fill = PatternFill("solid", fgColor="23415A")
+        for column in sheet.columns:
+            letter = column[0].column_letter
+            width = min(max(max(len(str(cell.value or "")) for cell in column) + 2, 12), 42)
+            sheet.column_dimensions[letter].width = width
+    for cell in workbook["Returns_Clean"][1]:
+        if cell.value != "date":
+            for row in range(2, workbook["Returns_Clean"].max_row + 1):
+                workbook["Returns_Clean"].cell(row, cell.column).number_format = "0.00%"
+    workbook.save(path)
+    return path
+
+
+def write_results(database: str, cfg: dict[str, Any], run_id: str, started: str) -> None:
+    """Write observed database and timing metrics; unavailable values stay explicit."""
+    with connect(database) as conn:
+        count = conn.execute("SELECT COUNT(*) FROM prices_raw").fetchone()[0]
+        clean_count = conn.execute("SELECT COUNT(*) FROM prices_clean").fetchone()[0]
+        bounds = conn.execute("SELECT MIN(date),MAX(date) FROM prices_raw").fetchone()
+        issue_rows = conn.execute(
+            "SELECT check_name,severity,COUNT(*) FROM dq_issues WHERE run_id=? "
+            "GROUP BY check_name,severity ORDER BY check_name,severity",
+            (run_id,),
+        ).fetchall()
+        impact = volatility_impact(conn, run_id)
+        finished = datetime.now(timezone.utc)
+        elapsed = (finished - datetime.fromisoformat(started)).total_seconds()
+    issues = (
+        "\n".join(f"- {name} ({severity}): {number}" for name, severity, number in issue_rows)
+        or "- None"
+    )
+    vol_text = (
+        "\n".join(
+            f"- {row['symbol']}: raw={row['raw_volatility']:.6g}, "
+            f"clean={row['clean_volatility']:.6g}, ratio={row['ratio']:.6g}"
+            for row in impact
+        )
+        or "- No symbols with error-level issues; volatility impact not measured on real data."
+    )
+    content = f"""# Run results
+
+Generated from run `{run_id}` at {finished.isoformat()}.
+
+- Symbols configured: {len(cfg["symbols"])}
+- Data range: {bounds[0] or "NOT MEASURED"} to {bounds[1] or "NOT MEASURED"}
+- Total stored rows: {count}
+- Rows excluded from clean: {count - clean_count}
+- Pipeline runtime: {elapsed:.2f} seconds
+- Pytest count: NOT MEASURED (run `pytest --collect-only -q`)
+- Coverage (`checks.py`, `clean.py`): NOT MEASURED
+
+## Issues by check
+
+{issues}
+
+## Volatility impact (real data)
+
+{vol_text}
+"""
+    Path("RESULTS.md").write_text(content, encoding="utf-8")
