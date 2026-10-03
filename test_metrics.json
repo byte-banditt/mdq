@@ -1,0 +1,21 @@
+{
+  "tests": 15,
+  "coverage": {
+    "checks.py": {
+      "covered": 48,
+      "statements": 57,
+      "percent": 84.2
+    },
+    "clean.py": {
+      "covered": 19,
+      "statements": 22,
+      "percent": 86.4
+    }
+  },
+  "synthetic_volatility": {
+    "clean": 0.004739682022152733,
+    "with_zero_ticks": "INFINITE",
+    "ratio": "INFINITE"
+  },
+  "pytest_exit_code": 0
+}

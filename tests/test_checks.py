@@ -56,6 +56,8 @@ def test_missing_sessions_absent_present_and_index_only():
     assert result[["symbol", "date"]].values.tolist() == [["A.NS", "2"]]
     assert len(check_missing_sessions(frame.iloc[[0, 2]], CFG)) == 0
     assert len(check_missing_sessions(frame.iloc[[0]], CFG)) == 0
+    configured = {"symbols": ["^NSEI", "A.NS", "B.NS"]}
+    assert len(check_missing_sessions(frame, configured)) == 3
 
 
 def test_stale_normal_threshold_and_zero_volume_edge():

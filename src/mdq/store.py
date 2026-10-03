@@ -20,6 +20,6 @@ def connect(database: str) -> sqlite3.Connection:
 
 
 def init_db(database: str) -> None:
-    schema = Path(__file__).resolve().parents[2] / "sql" / "schema.sql"
+    schema = Path(__file__).with_name("schema.sql")
     with connect(database) as conn:
         conn.executescript(schema.read_text(encoding="utf-8"))

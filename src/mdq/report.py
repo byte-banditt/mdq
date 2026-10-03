@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -59,6 +60,9 @@ def write_results(database: str, cfg: dict[str, Any], run_id: str, started: str)
     """Write observed database and timing metrics; unavailable values stay explicit."""
     with connect(database) as conn:
         count = conn.execute("SELECT COUNT(*) FROM prices_raw").fetchone()[0]
+        run_rows = conn.execute(
+            "SELECT rows_ingested FROM runs WHERE run_id=?", (run_id,)
+        ).fetchone()[0]
         clean_count = conn.execute("SELECT COUNT(*) FROM prices_clean").fetchone()[0]
         bounds = conn.execute("SELECT MIN(date),MAX(date) FROM prices_raw").fetchone()
         issue_rows = conn.execute(
@@ -69,6 +73,13 @@ def write_results(database: str, cfg: dict[str, Any], run_id: str, started: str)
         impact = volatility_impact(conn, run_id)
         finished = datetime.now(timezone.utc)
         elapsed = (finished - datetime.fromisoformat(started)).total_seconds()
+    metrics_path = Path("test_metrics.json")
+    metrics = json.loads(metrics_path.read_text()) if metrics_path.exists() else {}
+    test_count = metrics.get("tests", "NOT MEASURED")
+    coverage = metrics.get("coverage", {})
+    synthetic = metrics.get("synthetic_volatility", {})
+    checks_cov = coverage.get("checks.py", {}).get("percent", "NOT MEASURED")
+    clean_cov = coverage.get("clean.py", {}).get("percent", "NOT MEASURED")
     issues = (
         "\n".join(f"- {name} ({severity}): {number}" for name, severity, number in issue_rows)
         or "- None"
@@ -87,11 +98,13 @@ Generated from run `{run_id}` at {finished.isoformat()}.
 
 - Symbols configured: {len(cfg["symbols"])}
 - Data range: {bounds[0] or "NOT MEASURED"} to {bounds[1] or "NOT MEASURED"}
+- Rows ingested this run: {run_rows}
 - Total stored rows: {count}
 - Rows excluded from clean: {count - clean_count}
 - Pipeline runtime: {elapsed:.2f} seconds
-- Pytest count: NOT MEASURED (run `pytest --collect-only -q`)
-- Coverage (`checks.py`, `clean.py`): NOT MEASURED
+- Pytest count: {test_count}
+- Statement-line coverage: checks.py {checks_cov}%, clean.py {clean_cov}%
+  (stdlib trace + AST metric)
 
 ## Issues by check
 
@@ -100,5 +113,11 @@ Generated from run `{run_id}` at {finished.isoformat()}.
 ## Volatility impact (real data)
 
 {vol_text}
+
+## Synthetic zero-tick demonstration
+
+- Clean annualized volatility: {synthetic.get("clean", "NOT MEASURED")}
+- With injected zero-price ticks: {synthetic.get("with_zero_ticks", "NOT MEASURED")}
+- Ratio: {synthetic.get("ratio", "NOT MEASURED")} (synthetic only; log return at zero is infinite)
 """
     Path("RESULTS.md").write_text(content, encoding="utf-8")

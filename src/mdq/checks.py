@@ -45,10 +45,12 @@ def check_missing_sessions(df: pd.DataFrame, cfg: dict[str, Any]) -> pd.DataFram
     index_symbol = cfg.get("index_symbol", "^NSEI")
     calendar = set(df.loc[df.symbol == index_symbol, "date"])
     missing = []
-    for symbol, group in df.groupby("symbol"):
+    symbols = cfg.get("symbols", df["symbol"].unique())
+    for symbol in symbols:
         if symbol == index_symbol:
             continue
-        absent = sorted(calendar - set(group.date))
+        present = set(df.loc[df.symbol == symbol, "date"])
+        absent = sorted(calendar - present)
         missing.extend({"symbol": symbol, "date": day} for day in absent)
     result = pd.DataFrame(missing, columns=["symbol", "date"])
     if result.empty:

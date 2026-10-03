@@ -1,6 +1,6 @@
 import pandas as pd
 
-from mdq.clean import annualized_volatility, rebuild_clean
+from mdq.clean import annualized_volatility, rebuild_clean, volatility_impact
 from mdq.store import connect, init_db
 
 
@@ -40,6 +40,9 @@ def test_clean_excludes_error_keeps_warning_and_computes_impact(tmp_path):
             conn.execute("SELECT COUNT(*) FROM prices_clean WHERE symbol='WARN.NS'").fetchone()[0]
             == 1
         )
+        impact = volatility_impact(conn, "r1")
+        assert impact[0]["symbol"] == "BAD.NS"
+        assert impact[0]["raw_volatility"] == float("inf")
 
 
 def test_synthetic_zero_ticks_inflate_volatility():

@@ -47,9 +47,21 @@ def download_prices(symbols: list[str], start: str, end: str) -> pd.DataFrame:
                 part["symbol"] = symbol
                 part["date"] = pd.to_datetime(part.index).date.astype(str)
                 rows.append(part.reset_index(drop=True))
+            returned = {row["symbol"].iloc[0] for row in rows}
+            missing = set(symbols) - returned
+            if missing:
+                raise RuntimeError(f"yfinance omitted requested symbols: {sorted(missing)}")
             if not rows:
                 raise RuntimeError("yfinance returned no requested symbols")
             result = pd.concat(rows, ignore_index=True)
+            null_symbols = result.groupby("symbol")[["open", "high", "low", "close"]].apply(
+                lambda values: values.isna().all().all()
+            )
+            if null_symbols.any():
+                raise RuntimeError(
+                    "yfinance returned only null OHLC for: "
+                    f"{null_symbols[null_symbols].index.tolist()}"
+                )
             if "adj_close" not in result:
                 result["adj_close"] = result.get("close")
             return result[["symbol", "date", "open", "high", "low", "close", "adj_close", "volume"]]
@@ -77,7 +89,10 @@ def upsert_prices(conn: sqlite3.Connection, frame: pd.DataFrame, ingested_at: st
     sql = """INSERT INTO prices_raw(symbol,date,open,high,low,close,adj_close,volume,ingested_at)
     VALUES(?,?,?,?,?,?,?,?,?) ON CONFLICT(symbol,date) DO UPDATE SET
     open=excluded.open,high=excluded.high,low=excluded.low,close=excluded.close,
-    adj_close=excluded.adj_close,volume=excluded.volume,ingested_at=excluded.ingested_at"""
+    adj_close=excluded.adj_close,volume=excluded.volume,ingested_at=excluded.ingested_at
+    WHERE prices_raw.open IS NOT excluded.open OR prices_raw.high IS NOT excluded.high
+    OR prices_raw.low IS NOT excluded.low OR prices_raw.close IS NOT excluded.close
+    OR prices_raw.adj_close IS NOT excluded.adj_close OR prices_raw.volume IS NOT excluded.volume"""
     values = [
         (
             r.symbol,
