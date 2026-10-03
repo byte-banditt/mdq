@@ -1,0 +1,30 @@
+database: data/mdq.sqlite
+start_date: "2021-10-03"
+end_date: null
+overlap_days: 5
+symbols:
+  - RELIANCE.NS
+  - TCS.NS
+  - HDFCBANK.NS
+  - ICICIBANK.NS
+  - INFY.NS
+  - HINDUNILVR.NS
+  - ITC.NS
+  - SBIN.NS
+  - BHARTIARTL.NS
+  - KOTAKBANK.NS
+  - LT.NS
+  - AXISBANK.NS
+  - BAJFINANCE.NS
+  - MARUTI.NS
+  - SUNPHARMA.NS
+  - TATAMOTORS.NS
+  - TITAN.NS
+  - ASIANPAINT.NS
+  - ULTRACEMCO.NS
+  - WIPRO.NS
+  - TATASTEEL.NS
+  - ^NSEI
+checks:
+  stale_sessions: 5
+  return_outlier_robust_z: 8.0
