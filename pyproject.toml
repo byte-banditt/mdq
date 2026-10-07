@@ -7,7 +7,7 @@ name = "mdq"
 version = "0.1.0"
 description = "Daily NSE market data pipeline with data-quality checks"
 requires-python = ">=3.10"
-dependencies = ["pandas", "numpy", "PyYAML", "openpyxl", "yfinance"]
+dependencies = ["pandas", "numpy", "PyYAML", "openpyxl", "yfinance", "scipy", "matplotlib", "python-pptx"]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov", "ruff"]
@@ -19,7 +19,7 @@ mdq = "mdq.cli:main"
 where = ["src"]
 
 [tool.pytest.ini_options]
-pythonpath = ["src"]
+pythonpath = ["src", "index_lab"]
 
 [tool.ruff]
 line-length = 100

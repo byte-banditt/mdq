@@ -1,0 +1,122 @@
+{
+  "database": "../data/mdq.sqlite",
+  "price_table": "prices_raw",
+  "price_field": "adj_close",
+  "universe": [
+    "ASIANPAINT.NS",
+    "AXISBANK.NS",
+    "BAJFINANCE.NS",
+    "BHARTIARTL.NS",
+    "HDFCBANK.NS",
+    "HINDUNILVR.NS",
+    "ICICIBANK.NS",
+    "INFY.NS",
+    "ITC.NS",
+    "KOTAKBANK.NS",
+    "LT.NS",
+    "MARUTI.NS",
+    "RELIANCE.NS",
+    "SBIN.NS",
+    "SUNPHARMA.NS",
+    "TATASTEEL.NS",
+    "TCS.NS",
+    "TITAN.NS",
+    "ULTRACEMCO.NS",
+    "WIPRO.NS"
+  ],
+  "universe_label": "20-stock mdq sample; Nifty membership not independently verified",
+  "excluded": {
+    "TMPV.NS": "Unresolved adjusted returns above 20%; corporate action not verified"
+  },
+  "start": null,
+  "end": null,
+  "base_level": 1000,
+  "cost_bps": 10,
+  "net": true,
+  "risk_free": 0.05,
+  "annual_sessions": 252,
+  "momentum_months": 12,
+  "skip_months": 1,
+  "vol_days": 60,
+  "indices": {
+    "MOM10": {
+      "rule": "momentum",
+      "n": 10
+    },
+    "LVOL10": {
+      "rule": "low_vol",
+      "n": 10
+    }
+  },
+  "benchmark": "equal_weight_sample",
+  "thresholds": {
+    "stock_jump": 0.2,
+    "index_sigma": 4,
+    "turnover": 1.0,
+    "weight_cap": 0.2,
+    "stale_sessions": 5
+  },
+  "options": {
+    "spot": 1000,
+    "strike": 1000,
+    "rate": 0.05,
+    "q": 0.01,
+    "vol": 0.2,
+    "expiry": 1.0
+  },
+  "mc_paths": 100000,
+  "seed": 42,
+  "rates": {
+    "vol": 0.2,
+    "notional": 1000000,
+    "start": 0.0,
+    "end": 5.0,
+    "frequency": 2,
+    "swaption_expiry": 1.0,
+    "digital_strike": 0.05
+  },
+  "structured": {
+    "spot": 1000,
+    "vol": 0.2,
+    "rate": 0.05,
+    "q": 0.01,
+    "coupon": 0.08,
+    "autocall_barrier": 1.0,
+    "knock_in": 0.6,
+    "observations": [
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "steps": 252,
+    "plot_paths": 10000,
+    "spot_bump_ratio": 0.005,
+    "vol_bump": 0.005
+  },
+  "curve_inputs": "data/rates_inputs.csv",
+  "sector_inputs": "data/sector_map.csv",
+  "spread": {
+    "spot1": 100.0,
+    "spot2": 95.0,
+    "strike": 5.0,
+    "expiry": 1.0,
+    "rate": 0.05,
+    "vol1": 0.2,
+    "vol2": 0.25,
+    "correlation": 0.3,
+    "q1": 0.0,
+    "q2": 0.0
+  },
+  "range_accrual": {
+    "lower_ratio": 0.8,
+    "upper_ratio": 1.2,
+    "coupon": 0.05,
+    "observations": 252
+  },
+  "skew": {
+    "slope": 0.3,
+    "min_vol": 0.05,
+    "max_vol": 0.8
+  }
+}

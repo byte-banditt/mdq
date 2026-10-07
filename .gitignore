@@ -1,11 +1,63 @@
+# Python environments, bytecode and packaging
 .venv/
+venv/
 __pycache__/
+*.py[cod]
+*.egg-info/
+/build/
+/dist/
+
+# Test, lint and coverage outputs
 .pytest_cache/
 .ruff_cache/
-*.egg-info/
-data/
-output/*.xlsx
-logs/*.log
+.mypy_cache/
 .coverage
-coverage.json
 .coverage.*
+coverage.json
+htmlcov/
+/test_metrics.json
+
+# Local credentials and editor files
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+.DS_Store
+*~
+
+# Market data, local databases and runtime artifacts
+/data/
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.db
+*.db-*
+/logs/
+/output/
+/index_lab/reports/
+/RESULTS.md
+
+# Track only the explicit static educational input files
+/index_lab/data/*
+!/index_lab/data/nifty50_constituents.csv
+!/index_lab/data/sector_map.csv
+!/index_lab/data/rates_inputs.csv
+
+# Documents regenerated from local data
+/index_lab/docs/data_inventory.md
+/index_lab/docs/commentary.md
+/index_lab/docs/index_methodology.md
+/index_lab/docs/index_launch_form.md
+/index_lab/docs/index_change_note_example.md
+/index_lab/java_bs/python_reference.csv
+
+# Personal job, resume and interview material
+[Jj][Dd]*[Cc][Oo][Vv][Ee][Rr][Aa][Gg][Ee]*.md
+[Rr][Ee][Ss][Uu][Mm][Ee]*.md
+[Ii][Nn][Tt][Ee][Rr][Vv][Ii][Ee][Ww]*.md
+
+# Java compiler outputs
+*.class
+*.jar

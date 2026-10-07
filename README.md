@@ -41,8 +41,14 @@ pytest -q --cov=mdq --cov-report=term-missing --cov-report=json
 ruff check src tests
 ```
 
-The tests use committed CSV/synthetic fixtures and do not access network. Synthetic zero-tick volatility demonstration is explicitly not a real-data finding. See `docs/DATA_SOURCES.md`, `docs/INTERVIEW_NOTES.md`, and `sql/queries.sql`.
+The tests use committed CSV/synthetic fixtures and do not access network. Synthetic zero-tick volatility demonstration is explicitly not a real-data finding. See `docs/DATA_SOURCES.md` and `sql/queries.sql`.
 
 ## Limits
 
 One free-data source, daily bars, SQLite single-writer workflow, no cross-source validation, no correction/imputation. Yahoo Finance data can be delayed or revised; NSE holidays are inferred from the fetched Nifty index dates and can inherit source gaps. A single index-symbol fetch gap weakens the missing-session reference.
+
+## Index Lab extension
+
+Offline equity index, daily oversight, attribution/stress, derivatives pricing and Excel/PowerPoint reporting: [index_lab/README.md](index_lab/README.md). Uses this existing SQLite source with an explicitly disclosed sample universe and proxy benchmark. Run `cd index_lab && python run_all.py`; `pytest -q` from repository root verifies both projects. Verified full Nifty 50 coverage remains pending.
+
+Market-price databases, generated reports, coverage output and personal career notes stay local. Static educational CSV inputs and tests are committed. Index Lab integration tests require the local mdq database; populate it before running the full suite.
