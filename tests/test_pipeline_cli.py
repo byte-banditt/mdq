@@ -30,6 +30,10 @@ def test_pipeline_twice_is_idempotent_and_records_success(
     assert count == len(prices_frame)
     assert second == first
     assert successes == 2
+    report = Path("RESULTS.md").read_text()
+    assert "ratio ~1.0" not in report
+    assert "five error rows" not in report
+    assert "Rows excluded from clean:" in report
 
 
 def test_failed_download_marks_run_failed_and_leaves_price_tables_unchanged(

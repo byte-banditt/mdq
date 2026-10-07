@@ -135,9 +135,6 @@ Generated from run `{run_id}` at {finished.isoformat()}.
 
 {vol_text}
 
-Real-data impact is negligible (ratio ~1.0) because five error rows are null OHLC bars on
-`^NSEI`, not price corruption in equities.
-
 ## Synthetic zero-tick demonstration
 
 Synthetic only: naive return-based volatility with injected zero-price ticks is
